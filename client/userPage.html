@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Page</title>
+    <link rel="stylesheet" href="userPage.css">
+    <script defer src="userPage.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div class="userProfile">
+        <div class="header">
+            <img id="profilePhoto" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIZXN6BXkQE5CB_pLtHGAdr1klm3uox1Ja2A&s" alt="">
+            <h1 id="profileName">Username</h1>
+            <h1 id="add">Add a Workout</h1>
+        </div>
+        <div class="banners">
+            <h1>My Training Log</h1>
+        </div>
+        <div class="calendarContainer">
+            <div class="calendarHeader">
+                <button id="prevMonth">&lt;</button>
+                <h2 id="currentMonth"></h2>
+                <button id="nextMonth">&gt;</button>
+            </div>
+            <div class="calendar" id="calendar"></div>
+        </div>
+    </div>
+    <div class="categoryContainer">
+        <div class="categories"></div>
+    </div>
+    <div class="subcategoryContainer">
+        <div class="subcategories"></div>
+    </div>
+    <div class="workoutContainer">
+        <div class="workouts"></div>
+    </div>
+</body>
+</html>
