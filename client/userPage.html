@@ -8,7 +8,7 @@
     <script defer src="userPage.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
-<body>
+<body class="body">
     <div class="userProfile">
         <div class="header">
             <img id="profilePhoto" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIZXN6BXkQE5CB_pLtHGAdr1klm3uox1Ja2A&s" alt="">
@@ -27,6 +27,7 @@
         </div>
     </div>
     <div class="dayPlan" id="dayPlan">
+        <button id="planExit" type="button">Exit</button>
         <div class="planHeader">
             <h3 id="planDate">Date Here</h3>
             <h3 id="addWorkout">Add Workout</h3>
@@ -34,9 +35,11 @@
         <div class="planContent" id="planContent"></div>
     </div>
     <div class="categoryContainer" id="categoryContainer">
+        <button id="categoryExit" type="button">Exit</button>
         <div class="categories" id="categories"></div>
     </div>
     <div class="workoutContainer" id="workoutContainer">
+        <button id="workoutExit" type="button">Exit</button>
         <div class="workouts" id="workouts"></div>
     </div>
 </body>
