@@ -2,7 +2,7 @@ const { Schema } = require('mongoose')
 
 const workoutSchema = new Schema(
     {
-        subcategory_id: { type: Schema.Types.ObjectId, ref: 'subcategory', required: true },
+        category_id: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
         name: {type: String, required: true},
         duration: {type: Number, required: true},
         description: {type: String, required: true},

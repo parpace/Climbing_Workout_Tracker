@@ -5,7 +5,6 @@ const bodyParser = require(`body-parser`)
 const logger = require(`morgan`)
 const PORT = process.env.PORT || 3001
 const CategoryController = require('./controllers/CategoryController')
-const SubcategoryController = require('./controllers/SubcategoryController')
 const WorkoutController = require('./controllers/WorkoutController')
 const UserController = require('./controllers/UserController')
 
@@ -16,6 +15,9 @@ app.use(bodyParser.json())
 app.use(logger(`dev`))
 
 db.on('error', console.error.bind(console, 'MongoDB connection error:'))
+db.once('open', () => {
+    console.log('Connected to MongoDB')
+})
 app.listen(PORT, () => console.log(`Listening on port: ${PORT}`))
 
 ///////////////
@@ -24,10 +26,11 @@ app.listen(PORT, () => console.log(`Listening on port: ${PORT}`))
 app.get('/', (req, res) => res.send('This is our landing page!'))
 
 app.get('/categories', CategoryController.getAllCategories)
-app.get('/subcategories', SubcategoryController.getAllSubcategories)
 app.get('/workouts', WorkoutController.getAllWorkouts)
 app.get('/users', UserController.getAllUsers)
 
 app.get('/user/:id', UserController.getUserById)
 
 app.post('/api/authenticate', UserController.loginUser)
+
+app.get('/getUserWorkouts/:userId/:year/:month/:calendarType/:selectedDate?', UserController.getUserWorkouts)

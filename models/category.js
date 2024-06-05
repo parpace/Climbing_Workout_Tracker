@@ -8,4 +8,4 @@ const categorySchema = new Schema(
     {timestamps: true}
 )
 
-module.exports = categorySchema
+module.exports = (categorySchema)

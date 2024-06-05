@@ -16,20 +16,6 @@ body {
     margin-left: 2%;
 }
 
-#add {
-    background-color: darkgray;
-    margin-left: 60%;
-    cursor: pointer;
-    padding: 10px;
-    border-style: solid;
-    border-color: black;
-    border-radius: 20px;
-}
-
-#add:hover {
-    background-color: gray;
-}
-
 .banners {
     margin-left: 2%;
 }
@@ -72,6 +58,44 @@ body {
     background-color: darkgray;
     border-radius: 5px;
     text-align: center;
+    cursor: pointer;
+}
+
+.dayPlan {
+    display: none;
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    background-color: white;
+    z-index: 10;
+    padding: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+.planHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.planContent {
+    margin-top: 20px;
+}
+
+#addWorkout {
+    background-color: darkgray;
+    cursor: pointer;
+    padding: 5px;
+    border-style: solid;
+    border-color: black;
+    border-radius: 20px;
+}
+
+#addWorkout:hover {
+    background-color: gray;
 }
 
 .categories, .subcategories {
@@ -80,7 +104,7 @@ body {
     width: 100%;
 }
 
-.categoryContainer, .subcategoryContainer {
+.categoryContainer, .workoutContainer {
     display: none;
     position: absolute;
     top: 50%;
@@ -98,26 +122,23 @@ body {
     border-radius: 3%;
 }
 
-.categories div, .subcategories div {
+.categories, .workouts {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.categories div, .workouts div {
     background-color: lightgray;
-    border-radius: 10%;
-    padding: 4.2%;
-    margin: 0;
     border-radius: 10px;
-    border-width: 2%;
-    border-color: black;
-    border-style: solid;
-    box-sizing: border-box;
-    margin-bottom: 1%;
+    padding: 20px;
+    margin: 10px 0;
+    cursor: pointer;
     text-align: center;
 }
 
-.categories div:hover, .subcategories div:hover {
+.categories div:hover, .workouts div:hover {
     background-color: gray;
-}
-
-.workoutContainer {
-    display: none;
 }
 
 .dimmed {
