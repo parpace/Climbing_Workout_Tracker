@@ -33,11 +33,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const categoriesDiv = document.getElementById('categories')
     const workoutContainer = document.getElementById('workoutContainer')
     const workoutsDiv = document.getElementById('workouts')
-    const overlay = document.createElement('div')
 
     let currentCalendar = 'planned'
-
-    overlay.className = 'overlay'
 
     let currentDate = new Date()
     const months = [
@@ -73,19 +70,24 @@ document.addEventListener('DOMContentLoaded', function() {
         axios.get(`http://localhost:3001/getUserWorkouts/${userId}/${year}/${month}/${currentCalendar}`)
             .then(response => {
                 const workouts = response.data
-                console.log(workouts)
 
                 // Fill in the days of the month
                 for (let day = 1; day <= daysInMonth; day++) {
                     const dayElement = document.createElement('div')
                     dayElement.textContent = day
 
-                    const plannedWorkouts = workouts.filter(workout => new Date(workout.date).getDate() === day)
-                    // console.log(plannedWorkouts)
-                    plannedWorkouts.forEach(workout => {
-                        const workoutElement = document.createElement(`div`)
-                        workoutElement.textContent = workout.name
-                        dayElement.appendChild(workoutElement)
+                    const plannedWorkouts = workouts.filter(workout => {
+                        const workoutDate = new Date(workout.date)
+                        return workoutDate.getDate() === day
+                    })
+                    
+                    // forEach inception here.. Was having trouble accessing the workout name because my request is returning the workoutId and not the full model. ChatGBT saved me by explaining how to get from the workoutId number to the actual object of it's parent model.
+                    plannedWorkouts.forEach(workoutId => {
+                        workoutId.workouts.forEach(workout => {
+                            const workoutElement = document.createElement(`div`)
+                            workoutElement.textContent = workout.name
+                            dayElement.appendChild(workoutElement)
+                        })
                     })
 
                     dayElement.addEventListener('click', () => openDayPlan(year, month, day))
@@ -104,32 +106,118 @@ document.addEventListener('DOMContentLoaded', function() {
         planContent.innerHTML = ''
 
         dayPlan.style.display = `block`
-        overlay.style.display = 'block'
 
         axios.get(`http://localhost:3001/getUserWorkouts/${userId}/${year}/${month}/${currentCalendar}/${selectedDate.toISOString()}`)
             .then(response => {
                 const workouts = response.data
-                workouts.forEach(workout => {
-                    const workoutElement = document.createElement(`div`)
-                    workoutElement.textContent = workout.name
+                workouts.forEach(workoutId => {
+                    workoutId.workouts.forEach(workout => {
+                        const workoutElement = document.createElement(`div`)
+                        workoutElement.textContent = workout.name
 
-                    const logButton = document.createElement(`button`)
-                    logButton.textContent = `Log`
-                    // logButton.addEventListener(`click`, () => logWorkout(workout._id, selectedDate))
-                    workoutElement.appendChild(logButton)
+                        const logButton = document.createElement(`button`)
+                        logButton.textContent = `Log`
+                        // logButton.addEventListener(`click`, () => logWorkout(workout._id, selectedDate))
+                        workoutElement.appendChild(logButton)
 
-                    const deleteButton = document.createElement(`button`)
-                    deleteButton.textContent = `x`;
-                    // deleteButton.addEventListener(`click`, () => deleteWorkout(workout._id))
-                    workoutElement.appendChild(deleteButton)
+                        const deleteButton = document.createElement(`button`)
+                        deleteButton.textContent = `x`;
+                        deleteButton.addEventListener(`click`, () => deleteWorkout(workout._id))
+                        workoutElement.appendChild(deleteButton)
 
-                    planContent.appendChild(workoutElement)
+                        planContent.appendChild(workoutElement)
+                    })
                 })
             })
             .catch(error => {
                 planContent.innerHTML = '<p>Error loading workouts.</p>'
             })
     }
+
+    function renderCategories() {
+        categoriesDiv.innerHTML = ``
+        categoryContainer.style.display = `block`
+
+        axios.get(`http://localhost:3001/categories`)
+            .then(response => {
+                const categories = response.data
+                categories.forEach(category => {
+                    const categoryElement = document.createElement(`div`)
+                    categoryElement.textContent = category.name
+                    categoriesDiv.appendChild(categoryElement)
+
+                    categoryElement.addEventListener(`click`, () => renderWorkouts(category._id))
+                })
+            })
+            .catch(error => {
+                categoriesDiv.innerHTML = '<p>Error loading categories.</p>'
+            })
+    }
+
+    function renderWorkouts(categoryId) {
+        categoryContainer.style.display = `none`
+        categoriesDiv.innerHTML = ``
+        workoutsDiv.innerHTML = ``
+        workoutContainer.style.display = `block`
+
+        axios.get(`http://localhost:3001/workouts/${categoryId}`)
+            .then(response => {
+                const workouts = response.data
+                workouts.forEach(workout => {
+                    const workoutElement = document.createElement(`div`)
+                    workoutElement.textContent = workout.name
+                    workoutsDiv.appendChild(workoutElement)
+
+                    workoutElement.addEventListener('click', () => addWorkoutToPlan(workout._id))
+                })
+            })
+            .catch(error => {
+                workoutsDiv.innerHTML = '<p>Error loading workouts.</p>'
+            })
+    }
+
+    function addWorkoutToPlan(workoutId) {
+        workoutContainer.style.display = `none`
+        workoutsDiv.innerHTML = ``
+        const selectedDate = new Date(planDate.textContent)
+        const formattedDate = selectedDate.toISOString()
+
+        axios.post(`http://localhost:3001/addWorkoutToPlan`, {
+            userId: userId,
+            workoutId: workoutId,
+            date: formattedDate
+        })
+        .then(response => {
+            openDayPlan(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate())
+        })
+        .catch(error => {
+            console.error('Error adding workout to plan:', error)
+        })
+    }
+
+    function deleteWorkout(workoutId) {
+        const selectedDate = new Date(planDate.textContent)
+        const formattedDate = selectedDate.toISOString()
+
+        axios.delete(`http://localhost:3001/removeFromPlan`, {
+            data: {
+                userId: userId,
+                workoutId: workoutId,
+                date: formattedDate
+            }
+        })
+        .then(response => {
+            openDayPlan(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate())
+        })
+        .catch(error => {
+            console.error('Error removing workout to plan:', error)
+        })
+    }
+
+    addWorkout.addEventListener(`click`, () => {
+        console.log('Add workout button clicked')
+        renderCategories()
+    })
 
     prevMonthButton.addEventListener('click', function() {
         currentDate.setMonth(currentDate.getMonth() - 1)

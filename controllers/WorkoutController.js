@@ -1,4 +1,4 @@
-const {Workout} = require('../models');
+const {Workout, User} = require('../models');
 
 //Read
 const getAllWorkouts = async (req, res) => {
@@ -11,76 +11,94 @@ const getAllWorkouts = async (req, res) => {
 }
 
 //Read
-const getWorkoutById = async (req, res) => {
+const getWorkoutByCategory = async (req, res) => {
+    const categoryId = req.params.categoryId
     try {
-        const { id } = req.params
-        const singleObject = await Workout.findById(id)
-        if (singleObject) {
-            return res.json(singleObject)
+        const workouts = await Workout.find({ category_id: categoryId })
+        if (workouts) {
+            return res.json(workouts)
         }
-        return res.status(404).send(`that Workout doesn't exist`)
+        return res.status(404).send(`No workouts found for that category`)
     } catch (error) {
         if (error.name === 'CastError' && error.kind === 'ObjectId') {
-            return res.status(404).send(`That Workout doesn't exist`)
+            return res.status(404).send(`Invalid category ID`)
         }
         return res.status(500).send(error.message);
     }
 }
 
 //create
-const createWorkout = async (req, res) => {
-    try {
-        const newObject = new Workout(req.body)
-        await newObject.save()
-        return res.status(201).json({
-            newObject,
-        });
-    } catch (error) {
-        // if (error.name === 'CastError' && error.kind === 'ObjectId') {
-        //     return res.status(404).send(`That Workout doesn't exist`)
-        // }
-        return res.status(500).json({ error: error.message })
-    }
-}
+const addWorkoutToPlan = async (req, res) => {
+    const { userId, workoutId, date } = req.body
 
-//update
-const updateWorkout = async (req, res) => {
     try {
-        let { id } = req.params;
-        let changedObject = await Workout.findByIdAndUpdate(id, req.body, { new: true })
-        if (changedObject) {
-            return res.status(200).json(changedObject)
+        // Find the user by ID
+        const user = await User.findById(userId)
+        if (!user) { return res.status(404).send(`User not found`) }
+
+        // Find the planned workout entry for the specific date
+        let plannedWorkout = user.plannedWorkouts.find(
+            (entry) => entry.date.toISOString() === new Date(date).toISOString()
+        )
+
+        if (plannedWorkout) {
+            // If the entry exists for that date, add the workout to the workouts array
+            plannedWorkout.workouts.push(workoutId)
+        } else {
+            // If the entry does not exist, create a new one
+            user.plannedWorkouts.push({
+                date: new Date(date),
+                workouts: [workoutId]
+            })
         }
-        throw new Error("Workout not found and can't be updated")
+
+        // Save the updated user document
+        await user.save()
+
+        return res.status(200).json(user)
     } catch (error) {
-        if (error.name === 'CastError' && error.kind === 'ObjectId') {
-            return res.status(404).send(`That Workout doesn't exist`)
-        }
-        return res.status(500).send(error.message);
+        console.error('Error adding workout to plan:', error)
+        return res.status(500).send(error.message)
     }
 }
 
 //delete
-const deleteWorkout = async (req, res) => {
+// I couldn't figure this out on my own. I was using to filter to get rid of the workoutId that was equal to the one that was clicked, and even with ChatGPT we couldn't figure out what was wrong with it. So i asked ChatGPT if it had another way that it thinks would be nice to write the function, and it gave me this findIndex and splice solution. I'm still trying to understand the logic there though.
+const removeWorkoutFromPlan = async (req, res) => {
+    const { userId, workoutId, date } = req.body
+
     try {
-        const { id } = req.params;
-        const erasedObject = await Workout.findByIdAndDelete(id)
-        if (erasedObject) {
-            return res.status(200).send("Workout deleted");
+        // Find the user by ID
+        const user = await User.findById(userId).populate('plannedWorkouts.workouts')
+
+        if (!user) { return res.status(404).send(`User not found`) }
+
+        // Find the planned workout entry for the specific date
+        const plannedWorkout = user.plannedWorkouts.find(entry => entry.date.toISOString() === date)
+        if (!plannedWorkout) {
+            return res.status(404).send('Planned workout not found for the specified date')
         }
-        throw new Error("Workout not found and can't be deleted");
+
+        const index = plannedWorkout.workouts.findIndex(w => w._id.toString() === workoutId)
+        if (index === -1) {
+            return res.status(404).send('Workout not found in the planned workouts')
+        }
+
+        plannedWorkout.workouts.splice(index, 1)
+
+        // Save the updated user document
+        await user.save()
+
+        return res.status(200).json(user)
     } catch (error) {
-        if (error.name === 'CastError' && error.kind === 'ObjectId') {
-            return res.status(404).send(`That Workout doesn't exist`)
-        }
-        return res.status(500).send(error.message);
+        console.error('Error removing workout to plan:', error)
+        return res.status(500).send(error.message)
     }
 }
 
 module.exports = {
     getAllWorkouts,
-    getWorkoutById,
-    createWorkout,
-    updateWorkout,
-    deleteWorkout
+    getWorkoutByCategory,
+    addWorkoutToPlan,
+    removeWorkoutFromPlan
 }
