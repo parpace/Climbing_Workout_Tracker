@@ -19,8 +19,40 @@ const getPlannedUserWorkouts = async (req, res) => {
 
         // Filter planned workouts for the specified month and year
         const workouts = user.plannedWorkouts.filter(workout => {
-            const workoutDate = new Date(workout.date);
+            const workoutDate = new Date(workout.date)
             return workoutDate.getFullYear() === yearInt && workoutDate.getMonth() === monthInt
+        })
+
+        res.status(200).json(workouts);
+    } catch (error) {
+        console.error('Error fetching planned workouts:', error)
+        res.status(500).json({ error: 'Error fetching planned workouts' })
+    }
+}
+
+// I really didn't want to repeat myself here, but I ran out of time and was not able to make it work in the same route
+const getPlannedUserWorkoutsDay = async (req, res) => {
+    try {
+        const { userId, year, month, day } = req.params
+
+        // Find user by ID and populate planned workouts
+        const user = await User.findById(userId)
+            .populate('plannedWorkouts.workouts')
+            .exec()
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' })
+        }
+
+        // Convert the strings to integers
+        const yearInt = parseInt(year, 10)
+        const monthInt = parseInt(month, 10)
+        const dayInt = parseInt(day, 10)
+
+        // Filter planned workouts for the specified month and year
+        const workouts = user.plannedWorkouts.filter(workout => {
+            const workoutDate = new Date(workout.date)
+            return workoutDate.getFullYear() === yearInt && workoutDate.getMonth() === monthInt && workoutDate.getDate() === dayInt
         })
 
         res.status(200).json(workouts);
@@ -43,16 +75,48 @@ const getLoggedUserWorkouts = async (req, res) => {
             return res.status(404).json({ error: 'User not found' })
         }
 
+        // Convert the strings to integers
         const yearInt = parseInt(year, 10)
         const monthInt = parseInt(month, 10)
 
-        // Filter logged workouts for the specified month and year
+        // Filter logged workouts for the specified month, year and day
         const workouts = user.loggedWorkouts.filter(workout => {
             const workoutDate = new Date(workout.date)
             return workoutDate.getFullYear() === yearInt && workoutDate.getMonth() === monthInt
         })
 
         res.status(200).json(workouts)
+    } catch (error) {
+        console.error('Error fetching logged workouts:', error)
+        res.status(500).json({ error: 'Error fetching logged workouts' })
+    }
+}
+
+const getLoggedUserWorkoutsDay = async (req, res) => {
+    try {
+        const { userId, year, month, day } = req.params
+
+        // Find user by ID and populate logged workouts
+        const user = await User.findById(userId)
+            .populate('loggedWorkouts.workouts')
+            .exec()
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' })
+        }
+
+        // Convert the strings to integers
+        const yearInt = parseInt(year, 10)
+        const monthInt = parseInt(month, 10)
+        const dayInt = parseInt(day, 10)
+
+        // Filter logged workouts for the specified month and year
+        const workouts = user.loggedWorkouts.filter(workout => {
+            const workoutDate = new Date(workout.date)
+            return workoutDate.getFullYear() === yearInt && workoutDate.getMonth() === monthInt && workoutDate.getDate() === dayInt
+        })
+
+        res.status(200).json(workouts);
     } catch (error) {
         console.error('Error fetching logged workouts:', error)
         res.status(500).json({ error: 'Error fetching logged workouts' })
@@ -170,21 +234,6 @@ const addWorkoutToPlan = async (req, res) => {
     }
 }
 
-const getWorkoutsForDate = async (req, res) => {
-    try {
-        const { userId } = req.params
-        const { date } = req.query
-        const user = await User.findById(userId).populate('workoutPlans.workoutId')
-        if (!user) {
-            return res.status(404).send('User not found')
-        }
-        const workoutsForDate = user.workoutPlans.filter(plan => plan.date === date)
-        res.json(workoutsForDate.map(plan => plan.workoutId))
-    } catch (error) {
-        res.status(500).send(error.message)
-    }
-}
-
 
 module.exports = {
     getAllUsers,
@@ -194,7 +243,8 @@ module.exports = {
     updateUser,
     deleteUser,
     addWorkoutToPlan,
-    getWorkoutsForDate,
     getPlannedUserWorkouts,
-    getLoggedUserWorkouts
+    getPlannedUserWorkoutsDay,
+    getLoggedUserWorkouts,
+    getLoggedUserWorkoutsDay
 }

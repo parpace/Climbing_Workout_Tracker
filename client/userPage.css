@@ -93,28 +93,28 @@ body {
     border-radius: 5px;
 }
 
-.planDay {
+.planDay, .logDay {
     cursor: pointer;
     padding: 2%;
     background-color: darkgray;
     border-radius: 5px;
 }
 
-.planDay:hover {
+.planDay:hover, .logDay:hover {
     background-color: gray;
 }
 
-.planDayNumber {
+.planDayNumber, .logDayNumber {
     text-align: left;
 }
 
-.planDayWorkouts {
+.planDayWorkouts, .logDayWorkouts {
     display: flex;
 }
 
 /* ............................. Day Plan ..................................  */
 
-.dayPlan {
+.dayPlan, .dayLog {
     display: none;
     position: absolute;
     top: 50%;
@@ -128,13 +128,13 @@ body {
     border-radius: 3%;
 }
 
-.planHeader {
+.planHeader, .logHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.planContent {
+.planContent, .logContent {
     margin-top: 20px;
 }
 
@@ -203,4 +203,8 @@ body {
 
 .planExit:hover, .categoryExit:hover, .workoutExit:hover {
     background-color: gray;
+}
+
+.currentToggle {
+    background-color: darkgray;
 }

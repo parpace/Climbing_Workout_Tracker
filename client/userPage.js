@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const dayPlan = document.getElementById('dayPlan')
     const planDate = document.getElementById('planDate')
     const planContent = document.getElementById('planContent')
+    const logPlan = document.getElementById('dayLog')
+    const logDate = document.getElementById('logDate')
+    const logContent = document.getElementById('logContent')
     const addWorkout = document.getElementById('addWorkout')
     const categoryContainer = document.getElementById('categoryContainer')
     const categoriesDiv = document.getElementById('categories')
@@ -41,15 +44,17 @@ document.addEventListener('DOMContentLoaded', function() {
         })
 
 
-    let currentCalendar = 'planned'
-
     let currentDate = new Date()
     const months = [
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'
     ]
 
+    planToggle.classList.add(`currentToggle`)
+    /* ................................................. Plan Calendar ................................................. */
     planToggle.addEventListener(`click`, () => {
+        logToggle.classList.remove(`currentToggle`)
+        planToggle.classList.add(`currentToggle`)
         renderPlan(currentDate)
     })
     function renderPlan(date) {
@@ -84,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
             planCalendar.appendChild(blankDay)
         }
 
-        axios.get(`http://localhost:3001/getUserPlannedWorkouts/${userId}/${year}/${month}/${currentCalendar}`)
+        axios.get(`http://localhost:3001/getPlannedUserWorkouts/${userId}/${year}/${month}`)
             .then(response => {
                 const workouts = response.data
 
@@ -122,7 +127,10 @@ document.addEventListener('DOMContentLoaded', function() {
             })
     }
 
+    /* ................................................. Log Calendar ................................................. */
     logToggle.addEventListener(`click`, () => {
+        planToggle.classList.remove(`currentToggle`)
+        logToggle.classList.add(`currentToggle`)
         renderLog(currentDate)
     })
     function renderLog(date) {
@@ -157,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
             logCalendar.appendChild(blankDay)
         }
 
-        axios.get(`http://localhost:3001/getUserLoggedWorkouts/${userId}/${year}/${month}`)
+        axios.get(`http://localhost:3001/getLoggedUserWorkouts/${userId}/${year}/${month}`)
             .then(response => {
                 const workouts = response.data
 
@@ -185,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         })
                     })
 
-                    dayElement.addEventListener('click', () => openDayPlan(year, month, day))
+                    dayElement.addEventListener('click', () => openDayLog(year, month, day))
                     logCalendar.appendChild(dayElement)
                 }
             })
@@ -194,6 +202,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
     }
 
+    /* ................................................. Day Plan Functionality ................................................. */
     function openDayPlan(year, month, day) {
 
         userProfile.classList.add('dimmed')
@@ -204,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         dayPlan.style.display = `block`
 
-        axios.get(`http://localhost:3001/getUserPlannedWorkouts/${userId}/${year}/${month}/${currentCalendar}/${selectedDate.toISOString()}`)
+        axios.get(`http://localhost:3001/getPlannedUserWorkoutsDay/${userId}/${year}/${month}/${day}`)
             .then(response => {
                 const workouts = response.data
                 workouts.forEach(workoutId => {
@@ -228,6 +237,39 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 planContent.innerHTML = '<p>Error loading workouts.</p>'
+            })
+    }
+
+    /* ................................................. Day Log Functionality ................................................. */
+    function openDayLog(year, month, day) {
+
+        userProfile.classList.add('dimmed')
+        const selectedDate = new Date(year, month, day)
+        const formattedDate = selectedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+        logDate.textContent = formattedDate
+        logContent.innerHTML = ''
+
+        logPlan.style.display = `block`
+
+        axios.get(`http://localhost:3001/getLoggedUserWorkoutsDay/${userId}/${year}/${month}/${day}`)
+            .then(response => {
+                const workouts = response.data
+                workouts.forEach(workoutId => {
+                    workoutId.workouts.forEach(workout => {
+                        const workoutElement = document.createElement(`div`)
+                        workoutElement.textContent = workout.name
+
+                        const deleteButton = document.createElement(`button`)
+                        deleteButton.textContent = `Delete`;
+                        deleteButton.addEventListener(`click`, () => deleteLog(workout._id))
+                        workoutElement.appendChild(deleteButton)
+
+                        logContent.appendChild(workoutElement)
+                    })
+                })
+            })
+            .catch(error => {
+                logContent.innerHTML = '<p>Error loading workouts.</p>'
             })
     }
 
@@ -328,11 +370,32 @@ document.addEventListener('DOMContentLoaded', function() {
         })
     }
 
+    function deleteLog(workoutId) {
+        const selectedDate = new Date(planDate.textContent)
+        const formattedDate = selectedDate.toISOString()
+
+        axios.delete(`http://localhost:3001/removeFromLog`, {
+            data: {
+                userId: userId,
+                workoutId: workoutId,
+                date: formattedDate
+            }
+        })
+        .then(response => {
+            openDayLog(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate())
+        })
+        .catch(error => {
+            console.error('Error removing workout to plan:', error)
+        })
+    }
+
+    /* ................................................. Event Listeners ................................................. */
     addWorkout.addEventListener(`click`, () => {
         dayPlan.style.display = `none`
         renderCategories()
     })
 
+    // Sooooooooo much repeating myself here it hurts, but I only had so much time to research and kept running into so many complications while trying to simplify this code.
     planExit.addEventListener(`click`, () => {
         dayPlan.style.display = 'none'
         categoryContainer.style.display = 'none'
@@ -354,12 +417,16 @@ document.addEventListener('DOMContentLoaded', function() {
         userProfile.classList.remove('dimmed')
         renderPlan(currentDate)
     })
+    logExit.addEventListener(`click`, () => {
+        logPlan.style.display = 'none'
+        userProfile.classList.remove('dimmed')
+        renderLog(currentDate)
+    })
 
     prevMonthButton.addEventListener('click', function() {
         currentDate.setMonth(currentDate.getMonth() - 1)
         renderPlan(currentDate)
     })
-
     nextMonthButton.addEventListener('click', function() {
         currentDate.setMonth(currentDate.getMonth() + 1)
         renderPlan(currentDate)
@@ -367,33 +434,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
     renderPlan(currentDate)
 })
-
- // body.addEventListener('click', function(event) {
-    //     const outsideDayPlan = !dayPlan.contains(event.target)
-    //     const outsideCategoryContainer = !categoryContainer.contains(event.target)
-    //     const outsideWorkoutContainer = !workoutContainer.contains(event.target)
-    //     if (outsideDayPlan && outsideCategoryContainer && outsideWorkoutContainer) {
-    //         userProfile.classList.remove('dimmed')
-    //         dayPlan.style.display = 'none'
-    //     }
-    // })
-
-// document.addEventListener('click', function(event) {
-    //     const outsideDayPlan = !dayPlan.contains(event.target) && event.target !== addWorkout
-    //     const outsideCategoryContainer = !categoryContainer.contains(event.target)
-    //     const outsideWorkoutContainer = !workoutContainer.contains(event.target)
-
-    //     if (outsideCategoryContainer && outsideDayPlan && outsideWorkoutContainer) {
-    //         userProfile.classList.remove('dimmed')
-    //         dayPlan.style.display = 'none'
-    //         categoryContainer.style.display = 'none'
-    //         workoutContainer.style.display = 'none'
-    //         if (overlay.parentNode) {
-    //             overlay.parentNode.removeChild(overlay)
-    //         }
-    //     }
-    // })
-
-// const overlay = document.createElement('div')
-
-// overlay.className = 'overlay'

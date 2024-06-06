@@ -120,7 +120,36 @@ const removeWorkoutFromPlan = async (req, res) => {
 
         plannedWorkout.workouts.splice(index, 1)
 
-        // Save the updated user document
+        await user.save()
+
+        return res.status(200).json(user)
+    } catch (error) {
+        console.error('Error removing workout to plan:', error)
+        return res.status(500).send(error.message)
+    }
+}
+const removeWorkoutFromLog = async (req, res) => {
+    const { userId, workoutId, date } = req.body
+
+    try {
+        // Find the user by ID
+        const user = await User.findById(userId).populate('plannedWorkouts.workouts')
+
+        if (!user) { return res.status(404).send(`User not found`) }
+
+        // Find the planned workout entry for the specific date
+        const loggedWorkout = user.loggedWorkouts.find(entry => entry.date.toISOString() === date)
+        if (!loggedWorkout) {
+            return res.status(404).send('Planned workout not found for the specified date')
+        }
+
+        const index = loggedWorkout.workouts.findIndex(w => w._id.toString() === workoutId)
+        if (index === -1) {
+            return res.status(404).send('Workout not found in the planned workouts')
+        }
+
+        loggedWorkout.workouts.splice(index, 1)
+
         await user.save()
 
         return res.status(200).json(user)
@@ -135,5 +164,6 @@ module.exports = {
     getWorkoutByCategory,
     addWorkoutToPlan,
     removeWorkoutFromPlan,
-    addWorkoutToLog
+    addWorkoutToLog,
+    removeWorkoutFromLog
 }
