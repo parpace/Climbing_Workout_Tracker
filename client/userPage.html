@@ -11,19 +11,22 @@
 <body class="body">
     <div class="userProfile">
         <div class="header">
-            <img id="profilePhoto" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIZXN6BXkQE5CB_pLtHGAdr1klm3uox1Ja2A&s" alt="">
-            <h1 id="profileName">Username</h1>
+            <div class="profile">
+                <img id="profilePhoto" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIZXN6BXkQE5CB_pLtHGAdr1klm3uox1Ja2A&s" alt="">
+                <h1 id="profileName">Username</h1>
+            </div>
+            <div class="calendarToggle">
+                <h1 id="planToggle">Plan</h1>
+                <h1 id="logToggle">Log</h1>
+            </div>
         </div>
-        <div class="banners">
-            <h1>My Training Log</h1>
-        </div>
-        <div class="calendarContainer">
+        <div class="calendarContainer" id="calendarContainer">
             <div class="calendarHeader">
                 <button id="prevMonth">&lt;</button>
                 <h2 id="currentMonth"></h2>
                 <button id="nextMonth">&gt;</button>
             </div>
-            <div class="calendar" id="calendar"></div>
+            <!-- <div class="planCalendar" id="planCalendar"></div> -->
         </div>
     </div>
     <div class="dayPlan" id="dayPlan">

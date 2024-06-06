@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     
-    const body = document.querySelector(`.body`)
     const userProfile = document.querySelector('.userProfile')
-    const calendar = document.getElementById('calendar')
+    const calendarContainer = document.getElementById('calendarContainer')
+    // const planCalendar = document.getElementById('planCalendar')
     const currentMonth = document.getElementById('currentMonth')
     const prevMonthButton = document.getElementById('prevMonth')
     const nextMonthButton = document.getElementById('nextMonth')
@@ -48,8 +48,12 @@ document.addEventListener('DOMContentLoaded', function() {
         'July', 'August', 'September', 'October', 'November', 'December'
     ]
 
-    function renderPlanner(date) {
-        calendar.innerHTML = ''
+    function renderPlan(date) {
+        const planCalendar = document.createElement(`div`)
+        planCalendar.classList.add(`planCalendar`)
+        calendarContainer.appendChild(planCalendar)
+
+        planCalendar.innerHTML = ''
         const month = date.getMonth()
         const year = date.getFullYear()
         currentMonth.textContent = `${months[month]} ${year}`
@@ -61,16 +65,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
         daysOfWeek.forEach(day => {
             const dayElement = document.createElement('div')
+            dayElement.classList.add(`week`)
             dayElement.textContent = day
             dayElement.style.fontWeight = 'bold'
-            calendar.appendChild(dayElement)
+            planCalendar.appendChild(dayElement)
         })
 
         // Fill in the blank days before the start of the month
         for (let i = 0; i < firstDayOfMonth; i++) {
             const blankDay = document.createElement('div')
             blankDay.classList.add(`blank`)
-            calendar.appendChild(blankDay)
+            planCalendar.appendChild(blankDay)
         }
 
         axios.get(`http://localhost:3001/getUserWorkouts/${userId}/${year}/${month}/${currentCalendar}`)
@@ -80,7 +85,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Fill in the days of the month
                 for (let day = 1; day <= daysInMonth; day++) {
                     const dayElement = document.createElement('div')
-                    dayElement.textContent = day
+                    dayElement.classList.add(`day`)
+
+                    const dayNumber = document.createElement(`div`)
+                    dayNumber.textContent = day
+                    dayNumber.classList.add(`dayNumber`)
+                    dayElement.appendChild(dayNumber)
 
                     const plannedWorkouts = workouts.filter(workout => {
                         const workoutDate = new Date(workout.date)
@@ -91,17 +101,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     plannedWorkouts.forEach(workoutId => {
                         workoutId.workouts.forEach(workout => {
                             const workoutElement = document.createElement(`div`)
+                            workoutElement.classList.add(`dayWorkouts`)
                             workoutElement.textContent = workout.name
                             dayElement.appendChild(workoutElement)
                         })
                     })
 
                     dayElement.addEventListener('click', () => openDayPlan(year, month, day))
-                    calendar.appendChild(dayElement)
+                    planCalendar.appendChild(dayElement)
                 }
             })
             .catch(error => {
-                calendar.innerHTML = '<p>Error loading workouts.</p>'
+                planCalendar.innerHTML = '<p>Error loading workouts.</p>'
             })
     }
 
@@ -248,17 +259,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     prevMonthButton.addEventListener('click', function() {
         currentDate.setMonth(currentDate.getMonth() - 1)
-        renderPlanner(currentDate)
+        renderPlan(currentDate)
     })
 
     nextMonthButton.addEventListener('click', function() {
         currentDate.setMonth(currentDate.getMonth() + 1)
-        renderPlanner(currentDate)
+        renderPlan(currentDate)
     })
 
-    renderPlanner(currentDate)
+    renderPlan(currentDate)
+})
 
-    // body.addEventListener('click', function(event) {
+ // body.addEventListener('click', function(event) {
     //     const outsideDayPlan = !dayPlan.contains(event.target)
     //     const outsideCategoryContainer = !categoryContainer.contains(event.target)
     //     const outsideWorkoutContainer = !workoutContainer.contains(event.target)
@@ -267,8 +279,6 @@ document.addEventListener('DOMContentLoaded', function() {
     //         dayPlan.style.display = 'none'
     //     }
     // })
-
-})
 
 // document.addEventListener('click', function(event) {
     //     const outsideDayPlan = !dayPlan.contains(event.target) && event.target !== addWorkout
@@ -286,43 +296,6 @@ document.addEventListener('DOMContentLoaded', function() {
     //     }
     // })
 
-// document.addEventListener('click', function(event) {
-//     const outsideCategoryContainer = !categoryContainer.contains(event.target) && event.target !== addWorkout
-//     const outsideSubcategoryContainer = !subcategoryContainer.contains(event.target) && event.target !== addWorkout
-
-//     if (outsideCategoryContainer && outsideSubcategoryContainer) {
-//         userProfile.classList.remove('dimmed')
-//         categoryContainer.style.display = 'none'
-//         subcategoryContainer.style.display = 'none'
-//         if (overlay.parentNode) {
-//             overlay.parentNode.removeChild(overlay)
-//         }
-//     }
-// })
-
-
-
 // const overlay = document.createElement('div')
 
 // overlay.className = 'overlay'
-
-// addWorkout.addEventListener('click', async () => {
-//     userProfile.classList.add('dimmed')
-//     document.body.appendChild(overlay)
-//     categoryContainer.style.display = 'flex'
-
-//     categories.innerHTML = ''
-
-//     let categoryResponse = await axios.get(`http://localhost:3001/categories`)
-//     console.log(categoryResponse.data)
-//     const categoryArray = categoryResponse.data
-//     categoryArray.forEach(category => {
-//         const categoryElement = document.createElement('div')
-//         categoryElement.textContent = category.name
-//         categories.appendChild(categoryElement)
-
-//         categoryElement.addEventListener('click', () => {
-//             fetchAndRenderSubcategories(category._id)
-//         })
-//     })
-// })

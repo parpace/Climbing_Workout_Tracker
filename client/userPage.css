@@ -4,21 +4,48 @@ body {
 
 .header {
     display: flex;
+    justify-content: space-between;
+}
+
+.profile {
+    display: flex;
     align-items: center;
 }
 
 #profilePhoto {
-    width: 10%;
+    width: 30%;
     height: auto;
     border-radius: 50%;
     object-fit: cover;
-    margin-right: 1%;
+    margin-right: 2%;
     margin-left: 2%;
 }
 
-.banners {
-    margin-left: 2%;
+.calendarToggle {
+    display: flex;
+    margin-right: 4%;
 }
+
+#planToggle {
+    border-style: solid;
+    border-top-left-radius: 20%;
+    border-bottom-left-radius: 20%;
+    padding: 3%;
+}
+
+#logToggle {
+    border-style: solid;
+    border-top-right-radius: 20%;
+    border-bottom-right-radius: 20%;
+    padding: 3%;
+}
+
+#planToggle:hover, #logToggle:hover {
+    background-color: gray;
+    cursor: pointer;
+}
+
+/* ............................. Plan Calendar ..................................  */
 
 .calendarContainer {
     width: 70%;
@@ -47,31 +74,58 @@ body {
     margin: 0 20px;
 }
 
-.calendar {
+.planCalendar {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 5px;
+    grid-auto-rows: minmax(50%, auto);
 }
 
-.calendar div {
-    padding: 30%;
+.week {
+    padding: 2%;
     background-color: darkgray;
     border-radius: 5px;
-    text-align: center;
-    cursor: pointer;
 }
+
+.blank {
+    padding: 2%;
+    background-color: darkgray;
+    border-radius: 5px;
+}
+
+.day {
+    cursor: pointer;
+    padding: 2%;
+    background-color: darkgray;
+    border-radius: 5px;
+}
+
+.day:hover {
+    background-color: gray;
+}
+
+.dayNumber {
+    text-align: left;
+}
+
+.dayWorkouts {
+    display: flex;
+}
+
+/* ............................. Day Plan ..................................  */
 
 .dayPlan {
     display: none;
     position: absolute;
-    top: 50px;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
-    width: 70%;
+    transform: translate(-50%, -50%);
+    width: 50%;
+    height: 90%;
     background-color: white;
-    padding: 20px;
+    padding: 2%;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
+    border-radius: 3%;
 }
 
 .planHeader {
@@ -97,7 +151,9 @@ body {
     background-color: gray;
 }
 
-.categories, .subcategories {
+/* ............................. Categories and Workouts ..................................  */
+
+.categories {
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -143,4 +199,8 @@ body {
     position: relative;
     opacity: 0.5;
     pointer-events: none;
+}
+
+.planExit:hover, .categoryExit:hover, .workoutExit:hover {
+    background-color: gray;
 }
