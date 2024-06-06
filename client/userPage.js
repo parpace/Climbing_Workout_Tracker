@@ -1,8 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     
     const userProfile = document.querySelector('.userProfile')
-    const calendarContainer = document.getElementById('calendarContainer')
-    // const planCalendar = document.getElementById('planCalendar')
+    const calendar = document.getElementById('calendar')
+    const planToggle = document.getElementById('planToggle')
+    const logToggle = document.getElementById('logToggle')
     const currentMonth = document.getElementById('currentMonth')
     const prevMonthButton = document.getElementById('prevMonth')
     const nextMonthButton = document.getElementById('nextMonth')
@@ -48,10 +49,15 @@ document.addEventListener('DOMContentLoaded', function() {
         'July', 'August', 'September', 'October', 'November', 'December'
     ]
 
+    planToggle.addEventListener(`click`, () => {
+        renderPlan(currentDate)
+    })
     function renderPlan(date) {
+        calendar.innerHTML = ``
+
         const planCalendar = document.createElement(`div`)
         planCalendar.classList.add(`planCalendar`)
-        calendarContainer.appendChild(planCalendar)
+        calendar.appendChild(planCalendar)
 
         planCalendar.innerHTML = ''
         const month = date.getMonth()
@@ -85,11 +91,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Fill in the days of the month
                 for (let day = 1; day <= daysInMonth; day++) {
                     const dayElement = document.createElement('div')
-                    dayElement.classList.add(`day`)
+                    dayElement.classList.add(`planDay`)
 
                     const dayNumber = document.createElement(`div`)
                     dayNumber.textContent = day
-                    dayNumber.classList.add(`dayNumber`)
+                    dayNumber.classList.add(`planDayNumber`)
                     dayElement.appendChild(dayNumber)
 
                     const plannedWorkouts = workouts.filter(workout => {
@@ -101,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     plannedWorkouts.forEach(workoutId => {
                         workoutId.workouts.forEach(workout => {
                             const workoutElement = document.createElement(`div`)
-                            workoutElement.classList.add(`dayWorkouts`)
+                            workoutElement.classList.add(`planDayWorkouts`)
                             workoutElement.textContent = workout.name
                             dayElement.appendChild(workoutElement)
                         })
@@ -113,6 +119,78 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 planCalendar.innerHTML = '<p>Error loading workouts.</p>'
+            })
+    }
+
+    logToggle.addEventListener(`click`, () => {
+        renderLog(currentDate)
+    })
+    function renderLog(date) {
+        calendar.innerHTML = ``
+        
+        const logCalendar = document.createElement(`div`)
+        logCalendar.classList.add(`logCalendar`)
+        calendar.appendChild(logCalendar)
+
+        logCalendar.innerHTML = ''
+        const month = date.getMonth()
+        const year = date.getFullYear()
+        currentMonth.textContent = `${months[month]} ${year}`
+
+        const firstDayOfMonth = new Date(year, month, 1).getDay()
+        const daysInMonth = new Date(year, month + 1, 0).getDate()
+
+        // Fill in the days of the week headers
+        const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+        daysOfWeek.forEach(day => {
+            const dayElement = document.createElement('div')
+            dayElement.classList.add(`week`)
+            dayElement.textContent = day
+            dayElement.style.fontWeight = 'bold'
+            logCalendar.appendChild(dayElement)
+        })
+
+        // Fill in the blank days before the start of the month
+        for (let i = 0; i < firstDayOfMonth; i++) {
+            const blankDay = document.createElement('div')
+            blankDay.classList.add(`blank`)
+            logCalendar.appendChild(blankDay)
+        }
+
+        axios.get(`http://localhost:3001/getUserWorkouts/${userId}/${year}/${month}/${currentCalendar}`)
+            .then(response => {
+                const workouts = response.data
+
+                // Fill in the days of the month
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayElement = document.createElement('div')
+                    dayElement.classList.add(`logDay`)
+
+                    const dayNumber = document.createElement(`div`)
+                    dayNumber.textContent = day
+                    dayNumber.classList.add(`logDayNumber`)
+                    dayElement.appendChild(dayNumber)
+
+                    const loggedWorkouts = workouts.filter(workout => {
+                        const workoutDate = new Date(workout.date)
+                        return workoutDate.getDate() === day
+                    })
+                    
+                    loggedWorkouts.forEach(workoutId => {
+                        workoutId.workouts.forEach(workout => {
+                            const workoutElement = document.createElement(`div`)
+                            workoutElement.classList.add(`logDayWorkouts`)
+                            workoutElement.textContent = workout.name
+                            dayElement.appendChild(workoutElement)
+                        })
+                    })
+
+                    dayElement.addEventListener('click', () => openDayPlan(year, month, day))
+                    logCalendar.appendChild(dayElement)
+                }
+            })
+            .catch(error => {
+                logCalendar.innerHTML = '<p>Error loading workouts.</p>'
             })
     }
 
@@ -136,7 +214,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                         const logButton = document.createElement(`button`)
                         logButton.textContent = `Log`
-                        // logButton.addEventListener(`click`, () => logWorkout(workout._id, selectedDate))
+                        logButton.addEventListener(`click`, () => logWorkout(workout._id))
                         workoutElement.appendChild(logButton)
 
                         const deleteButton = document.createElement(`button`)
@@ -211,6 +289,23 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error adding workout to plan:', error)
+        })
+    }
+
+    function logWorkout(workoutId) {
+        const selectedDate = new Date(planDate.textContent)
+        const formattedDate = selectedDate.toISOString()
+
+        axios.post(`http://localhost:3001/addWorkoutToLog`, {
+            userId: userId,
+            workoutId: workoutId,
+            date: formattedDate
+        })
+        .then(response => {
+            openDayPlan(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate())
+        })
+        .catch(error => {
+            console.error('Error adding workout to log:', error)
         })
     }
 

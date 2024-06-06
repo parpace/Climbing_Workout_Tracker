@@ -1,6 +1,56 @@
 const {User, Workout} = require('../models');
 
-const getUserWorkouts = async (req, res) => {
+const getPlannedUserWorkouts = async (req, res) => {
+    try {
+        const { userId, year, month, calendarType, selectedDate } = req.params
+
+        // Find user by ID
+        const user = await User.findById(userId)
+            .populate({
+                path: calendarType === 'planned' ? 'plannedWorkouts.workouts' : 'loggedWorkouts',
+                model: 'Workout'
+            })
+            .exec()
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' })
+        }    
+
+        if (selectedDate) {
+            // Fetch workouts for the specific date
+            const specificDate = new Date(selectedDate)
+            const workouts = calendarType === 'planned'
+                ? user.plannedWorkouts.filter(workout => new Date(workout.date).toDateString() === specificDate.toDateString())
+                : user.loggedWorkouts.filter(workout => new Date(workout.date).toDateString() === specificDate.toDateString())
+
+            console.log('Workouts for specific date:', workouts)
+            return res.status(200).json(workouts)
+        } else {
+            // Fetch workouts for the entire month
+            const yearInt = parseInt(year, 10)
+            const monthInt = parseInt(month, 10)
+
+            // Get the relevant workouts based on the calendar type
+            const workouts = calendarType === 'planned'
+                ? user.plannedWorkouts.filter(workout => {
+                    const workoutDate = new Date(workout.date)
+                    return workoutDate.getFullYear() === yearInt && workoutDate.getMonth() === monthInt
+                })
+                : user.loggedWorkouts.filter(workout => {
+                    const workoutDate = new Date(workout.date)
+                    return workoutDate.getFullYear() === yearInt && workoutDate.getMonth() === monthInt
+                })
+
+            // Respond with the workouts
+            res.status(200).json(workouts)
+        }
+    } catch (error) {
+        console.error('Error fetching user workouts:', error)
+        res.status(500).json({ error: 'Error fetching user workouts' })
+    }
+}
+
+const getLoggedUserWorkouts = async (req, res) => {
     try {
         const { userId, year, month, calendarType, selectedDate } = req.params
 
@@ -186,5 +236,6 @@ module.exports = {
     deleteUser,
     addWorkoutToPlan,
     getWorkoutsForDate,
-    getUserWorkouts
+    getPlannedUserWorkouts,
+    getLoggedUserWorkouts
 }

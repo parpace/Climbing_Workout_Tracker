@@ -9,7 +9,10 @@ const userSchema = new Schema(
             date: Date,
             workouts: [{ type: Schema.Types.ObjectId, ref: 'Workout' }]
         }],
-        loggedWorkouts: [{ type: Schema.Types.ObjectId, ref: 'Workout' }]
+        loggedWorkouts: [{ 
+            date: Date,
+            type: Schema.Types.ObjectId, ref: 'Workout' 
+        }]
     },
     {timestamps: true}
 )

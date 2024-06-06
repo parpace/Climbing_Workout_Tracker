@@ -62,6 +62,40 @@ const addWorkoutToPlan = async (req, res) => {
     }
 }
 
+const addWorkoutToLog = async (req, res) => {
+    const { userId, workoutId, date } = req.body
+
+    try {
+        // Find the user by ID
+        const user = await User.findById(userId)
+        if (!user) { return res.status(404).send(`User not found`) }
+
+        // Find the planned workout entry for the specific date
+        let loggedWorkout = user.loggedWorkouts.find(
+            (entry) => entry.date.toISOString() === new Date(date).toISOString()
+        )
+
+        if (loggedWorkout) {
+            // If the entry exists for that date, add the workout to the logged workouts array
+            loggedWorkout.workouts.push(workoutId)
+        } else {
+            // If the entry does not exist, create a new one
+            user.loggedWorkouts.push({
+                date: new Date(date),
+                workouts: [workoutId]
+            })
+        }
+
+        // Save the updated user document
+        await user.save()
+
+        return res.status(200).json(user)
+    } catch (error) {
+        console.error('Error adding workout to log:', error)
+        return res.status(500).send(error.message)
+    }
+}
+
 //delete
 // I couldn't figure this out on my own. I was using to filter to get rid of the workoutId that was equal to the one that was clicked, and even with ChatGPT we couldn't figure out what was wrong with it. So i asked ChatGPT if it had another way that it thinks would be nice to write the function, and it gave me this findIndex and splice solution. I'm still trying to understand the logic there though.
 const removeWorkoutFromPlan = async (req, res) => {
@@ -100,5 +134,6 @@ module.exports = {
     getAllWorkouts,
     getWorkoutByCategory,
     addWorkoutToPlan,
-    removeWorkoutFromPlan
+    removeWorkoutFromPlan,
+    addWorkoutToLog
 }

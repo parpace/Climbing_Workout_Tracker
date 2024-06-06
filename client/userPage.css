@@ -74,7 +74,7 @@ body {
     margin: 0 20px;
 }
 
-.planCalendar {
+.planCalendar, .logCalendar {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 5px;
@@ -93,22 +93,22 @@ body {
     border-radius: 5px;
 }
 
-.day {
+.planDay {
     cursor: pointer;
     padding: 2%;
     background-color: darkgray;
     border-radius: 5px;
 }
 
-.day:hover {
+.planDay:hover {
     background-color: gray;
 }
 
-.dayNumber {
+.planDayNumber {
     text-align: left;
 }
 
-.dayWorkouts {
+.planDayWorkouts {
     display: flex;
 }
 
