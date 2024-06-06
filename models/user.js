@@ -11,7 +11,7 @@ const userSchema = new Schema(
         }],
         loggedWorkouts: [{ 
             date: Date,
-            type: Schema.Types.ObjectId, ref: 'Workout' 
+            workouts: [{ type: Schema.Types.ObjectId, ref: 'Workout' }]
         }]
     },
     {timestamps: true}

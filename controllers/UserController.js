@@ -1,102 +1,61 @@
-const {User, Workout} = require('../models');
+const { User } = require('../models')
 
 const getPlannedUserWorkouts = async (req, res) => {
     try {
-        const { userId, year, month, calendarType, selectedDate } = req.params
+        const { userId, year, month } = req.params
 
-        // Find user by ID
+        // Find user by ID and populate planned workouts
         const user = await User.findById(userId)
-            .populate({
-                path: calendarType === 'planned' ? 'plannedWorkouts.workouts' : 'loggedWorkouts',
-                model: 'Workout'
-            })
-            .exec()
+            .populate('plannedWorkouts.workouts') //Found this method on stackoverflow that makes your life so much easier
+            .exec() //Function wasn't working, and chat gpt said that I needed this execute which sometimes helps when chaining multiple query methods together. Works now!
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' })
-        }    
-
-        if (selectedDate) {
-            // Fetch workouts for the specific date
-            const specificDate = new Date(selectedDate)
-            const workouts = calendarType === 'planned'
-                ? user.plannedWorkouts.filter(workout => new Date(workout.date).toDateString() === specificDate.toDateString())
-                : user.loggedWorkouts.filter(workout => new Date(workout.date).toDateString() === specificDate.toDateString())
-
-            console.log('Workouts for specific date:', workouts)
-            return res.status(200).json(workouts)
-        } else {
-            // Fetch workouts for the entire month
-            const yearInt = parseInt(year, 10)
-            const monthInt = parseInt(month, 10)
-
-            // Get the relevant workouts based on the calendar type
-            const workouts = calendarType === 'planned'
-                ? user.plannedWorkouts.filter(workout => {
-                    const workoutDate = new Date(workout.date)
-                    return workoutDate.getFullYear() === yearInt && workoutDate.getMonth() === monthInt
-                })
-                : user.loggedWorkouts.filter(workout => {
-                    const workoutDate = new Date(workout.date)
-                    return workoutDate.getFullYear() === yearInt && workoutDate.getMonth() === monthInt
-                })
-
-            // Respond with the workouts
-            res.status(200).json(workouts)
         }
+
+        // Convert the strings to integers
+        const yearInt = parseInt(year, 10)
+        const monthInt = parseInt(month, 10)
+
+        // Filter planned workouts for the specified month and year
+        const workouts = user.plannedWorkouts.filter(workout => {
+            const workoutDate = new Date(workout.date);
+            return workoutDate.getFullYear() === yearInt && workoutDate.getMonth() === monthInt
+        })
+
+        res.status(200).json(workouts);
     } catch (error) {
-        console.error('Error fetching user workouts:', error)
-        res.status(500).json({ error: 'Error fetching user workouts' })
+        console.error('Error fetching planned workouts:', error)
+        res.status(500).json({ error: 'Error fetching planned workouts' })
     }
 }
 
 const getLoggedUserWorkouts = async (req, res) => {
     try {
-        const { userId, year, month, calendarType, selectedDate } = req.params
+        const { userId, year, month } = req.params
 
-        // Find user by ID
+        // Find user by ID and populate logged workouts
         const user = await User.findById(userId)
-            .populate({
-                path: calendarType === 'planned' ? 'plannedWorkouts.workouts' : 'loggedWorkouts',
-                model: 'Workout'
-            })
+            .populate('loggedWorkouts.workouts')
             .exec()
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' })
-        }    
-
-        if (selectedDate) {
-            // Fetch workouts for the specific date
-            const specificDate = new Date(selectedDate)
-            const workouts = calendarType === 'planned'
-                ? user.plannedWorkouts.filter(workout => new Date(workout.date).toDateString() === specificDate.toDateString())
-                : user.loggedWorkouts.filter(workout => new Date(workout.date).toDateString() === specificDate.toDateString())
-
-            console.log('Workouts for specific date:', workouts)
-            return res.status(200).json(workouts)
-        } else {
-            // Fetch workouts for the entire month
-            const yearInt = parseInt(year, 10)
-            const monthInt = parseInt(month, 10)
-
-            // Get the relevant workouts based on the calendar type
-            const workouts = calendarType === 'planned'
-                ? user.plannedWorkouts.filter(workout => {
-                    const workoutDate = new Date(workout.date)
-                    return workoutDate.getFullYear() === yearInt && workoutDate.getMonth() === monthInt
-                })
-                : user.loggedWorkouts.filter(workout => {
-                    const workoutDate = new Date(workout.date)
-                    return workoutDate.getFullYear() === yearInt && workoutDate.getMonth() === monthInt
-                })
-
-            // Respond with the workouts
-            res.status(200).json(workouts)
         }
+
+        const yearInt = parseInt(year, 10)
+        const monthInt = parseInt(month, 10)
+
+        // Filter logged workouts for the specified month and year
+        const workouts = user.loggedWorkouts.filter(workout => {
+            const workoutDate = new Date(workout.date)
+            return workoutDate.getFullYear() === yearInt && workoutDate.getMonth() === monthInt
+        })
+
+        res.status(200).json(workouts)
     } catch (error) {
-        console.error('Error fetching user workouts:', error)
-        res.status(500).json({ error: 'Error fetching user workouts' })
+        console.error('Error fetching logged workouts:', error)
+        res.status(500).json({ error: 'Error fetching logged workouts' })
     }
 }
 
@@ -106,7 +65,7 @@ const getAllUsers = async (req, res) => {
         const objectArray = await User.find()
         res.json(objectArray)
     } catch (error) {
-        return res.status(500).send(error.message);
+        return res.status(500).send(error.message)
     }
 }
 
@@ -123,7 +82,7 @@ const getUserById = async (req, res) => {
         if (error.name === 'CastError' && error.kind === 'ObjectId') {
             return res.status(404).send(`That User doesn't exist`)
         }
-        return res.status(500).send(error.message);
+        return res.status(500).send(error.message)
     }
 }
 
@@ -149,7 +108,7 @@ const createUser = async (req, res) => {
         await newObject.save()
         return res.status(201).json({
             newObject,
-        });
+        })
     } catch (error) {
         // if (error.name === 'CastError' && error.kind === 'ObjectId') {
         //     return res.status(404).send(`That User doesn't exist`)
@@ -161,7 +120,7 @@ const createUser = async (req, res) => {
 //update
 const updateUser = async (req, res) => {
     try {
-        let { id } = req.params;
+        let { id } = req.params
         let changedObject = await User.findByIdAndUpdate(id, req.body, { new: true })
         if (changedObject) {
             return res.status(200).json(changedObject)
@@ -171,19 +130,19 @@ const updateUser = async (req, res) => {
         if (error.name === 'CastError' && error.kind === 'ObjectId') {
             return res.status(404).send(`That User doesn't exist`)
         }
-        return res.status(500).send(error.message);
+        return res.status(500).send(error.message)
     }
 }
 
 //delete
 const deleteUser = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { id } = req.params
         const erasedObject = await User.findByIdAndDelete(id)
         if (erasedObject) {
             return res.status(200).send("User deleted");
         }
-        throw new Error("User not found and can't be deleted");
+        throw new Error("User not found and can't be deleted")
     } catch (error) {
         if (error.name === 'CastError' && error.kind === 'ObjectId') {
             return res.status(404).send(`That User doesn't exist`)

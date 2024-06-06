@@ -1,4 +1,4 @@
-const {Workout, User} = require('../models');
+const {Workout, User} = require('../models')
 
 //Read
 const getAllWorkouts = async (req, res) => {
@@ -6,7 +6,7 @@ const getAllWorkouts = async (req, res) => {
         const objectArray = await Workout.find()
         res.json(objectArray)
     } catch (error) {
-        return res.status(500).send(error.message);
+        return res.status(500).send(error.message)
     }
 }
 
@@ -76,7 +76,7 @@ const addWorkoutToLog = async (req, res) => {
         )
 
         if (loggedWorkout) {
-            // If the entry exists for that date, add the workout to the logged workouts array
+            // If the entry exists for that date, add the workout to the loggedWorkouts array
             loggedWorkout.workouts.push(workoutId)
         } else {
             // If the entry does not exist, create a new one

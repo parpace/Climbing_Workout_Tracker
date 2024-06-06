@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
             planCalendar.appendChild(blankDay)
         }
 
-        axios.get(`http://localhost:3001/getUserWorkouts/${userId}/${year}/${month}/${currentCalendar}`)
+        axios.get(`http://localhost:3001/getUserPlannedWorkouts/${userId}/${year}/${month}/${currentCalendar}`)
             .then(response => {
                 const workouts = response.data
 
@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
             logCalendar.appendChild(blankDay)
         }
 
-        axios.get(`http://localhost:3001/getUserWorkouts/${userId}/${year}/${month}/${currentCalendar}`)
+        axios.get(`http://localhost:3001/getUserLoggedWorkouts/${userId}/${year}/${month}`)
             .then(response => {
                 const workouts = response.data
 
@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         dayPlan.style.display = `block`
 
-        axios.get(`http://localhost:3001/getUserWorkouts/${userId}/${year}/${month}/${currentCalendar}/${selectedDate.toISOString()}`)
+        axios.get(`http://localhost:3001/getUserPlannedWorkouts/${userId}/${year}/${month}/${currentCalendar}/${selectedDate.toISOString()}`)
             .then(response => {
                 const workouts = response.data
                 workouts.forEach(workoutId => {
@@ -302,7 +302,7 @@ document.addEventListener('DOMContentLoaded', function() {
             date: formattedDate
         })
         .then(response => {
-            openDayPlan(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate())
+            deleteWorkout(workoutId)
         })
         .catch(error => {
             console.error('Error adding workout to log:', error)
@@ -338,18 +338,21 @@ document.addEventListener('DOMContentLoaded', function() {
         categoryContainer.style.display = 'none'
         workoutContainer.style.display = 'none'
         userProfile.classList.remove('dimmed')
+        renderPlan(currentDate)
     })
     categoryExit.addEventListener(`click`, () => {
         dayPlan.style.display = 'none'
         categoryContainer.style.display = 'none'
         workoutContainer.style.display = 'none'
         userProfile.classList.remove('dimmed')
+        renderPlan(currentDate)
     })
     workoutExit.addEventListener(`click`, () => {
         dayPlan.style.display = 'none'
         categoryContainer.style.display = 'none'
         workoutContainer.style.display = 'none'
         userProfile.classList.remove('dimmed')
+        renderPlan(currentDate)
     })
 
     prevMonthButton.addEventListener('click', function() {

@@ -30,7 +30,8 @@ app.get('/workouts', WorkoutController.getAllWorkouts)
 app.get('/users', UserController.getAllUsers)
 
 app.get('/user/:id', UserController.getUserById)
-app.get('/getUserWorkouts/:userId/:year/:month/:calendarType/:selectedDate?', UserController.getPlannedUserWorkouts)
+app.get('/getUserPlannedWorkouts/:userId/:year/:month/:calendarType/:selectedDate?', UserController.getPlannedUserWorkouts)
+app.get('/getUserLoggedWorkouts/:userId/:year/:month?', UserController.getLoggedUserWorkouts)
 app.get('/workouts/:categoryId', WorkoutController.getWorkoutByCategory)
 
 app.post('/api/authenticate', UserController.loginUser)
