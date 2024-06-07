@@ -1,7 +1,21 @@
 # Climbing_Workout_Tracker
 
 ## Goal
-The goal of this project is to create a catalog of climbing workouts that is organized based on the type of training and energy system that is used. As a stretch goal, a user database can be created. Each user will have a list of climbing workouts that they have completed and the dates that they completed them, and can update this list by choosing to log a workout.
+The goal of this project is to create a training plan application that allows users to add workouts to a plan, as well as log what workouts they have completed. 
+Each user should have those plans and logs stored into their profile based on the date that they are planning to do the workout, or the date in which they are trying to log it. 
+When the user logs in, the site should then be able to render a calendar for them using that data, and allow them to interact with it.
+
+## Stretch Goal
+As a stretch goal, I would like for the user to be able to log specifics about the workout that they did. They could have many optional attributes to fill out (weights, reps, sets, etc) based on what the workout looks like. Then, when they log it, all of those attributes are saved.
 
 ## Back End
-Category will be our parent database for Energy_Systems
+
+__Models__
+* Categories will be our parent database. Workouts will be the child of Categories, and Users will be the child of Workouts.
+* Users should include attributes of plannedWorkouts and loggedWorkouts.
+* Both plannedWorkouts and loggedWorkouts will need to be an array of objects based on a date, and each date will have a unique id in that array so that we can reference it in our calendar.
+* Along with a date, plannedWorkouts and loggedWorkouts should have a workouts attribute. This workouts attribute will also need to be an array, so that it can store all of the workouts for that date.
+![image](https://github.com/parpace/Climbing_Workout_Tracker/assets/168449799/f1a3914d-b875-45f0-8ae6-743f3fe82903)
+
+__Controllers__
+* For out CategoryController, we only 
