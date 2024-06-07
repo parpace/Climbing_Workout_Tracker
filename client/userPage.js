@@ -220,18 +220,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     workoutId.workouts.forEach(workout => {
                         const workoutElement = document.createElement(`div`)
                         workoutElement.textContent = workout.name
+                        planContent.appendChild(workoutElement)
+
+                        const buttonDiv = document.createElement(`div`)
+                        buttonDiv.classList.add(`planButtons`)
+                        workoutElement.appendChild(buttonDiv)
 
                         const logButton = document.createElement(`button`)
                         logButton.textContent = `Log`
                         logButton.addEventListener(`click`, () => logWorkout(workout._id))
-                        workoutElement.appendChild(logButton)
+                        buttonDiv.appendChild(logButton)
 
                         const deleteButton = document.createElement(`button`)
                         deleteButton.textContent = `Delete`;
                         deleteButton.addEventListener(`click`, () => deleteWorkout(workout._id))
-                        workoutElement.appendChild(deleteButton)
-
-                        planContent.appendChild(workoutElement)
+                        buttonDiv.appendChild(deleteButton)
                     })
                 })
             })

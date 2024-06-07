@@ -1,19 +1,23 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: lightgray;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    margin: 0;
+    background-image: url("/photos/jeff-ochoa-53S-oN_r9SU-unsplash.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 h1 {
-    margin-bottom: 40px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 250%;
+    text-align: right;
+    margin-top: 2%;
+    margin-right: 3%;
 }
 
 .container {
+    margin-top: 13%;
+    margin-left: 40%;
     background-color: #fff;
     padding: 20px;
     border-radius: 10px;
@@ -46,7 +50,7 @@ input {
 button {
     width: 100%;
     padding: 10px;
-    background-color: deepskyblue;
+    background-color: darkgray;
     border: none;
     border-radius: 5px;
     color: white;
@@ -55,7 +59,7 @@ button {
 }
 
 button:hover {
-    background-color: dodgerblue;
+    background-color: gray;
 }
 
 #error-message {
